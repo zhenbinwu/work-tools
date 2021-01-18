@@ -6,6 +6,7 @@ parser=OptionParser()
 parser.add_option("-o","--outname",default="SL",help="Output name extension")
 parser.add_option("-v","--verbose",default=False,action='store_true',help="Turn on verbosity")
 parser.add_option("","--model",default="mymodel",help="Choose python model (which defines SL inputs) to run over for SL")
+parser.add_option("","--signal",default="T2tt_1000_0",help="Select signal to run over")
 parser.add_option("","--limit",default=False,action='store_true',help="Calculate Limit instead of the scan")
 parser.add_option("","--doMultiplicative",default=False,action='store_true',help="Multiplicative rather than additive parameterisation")
 parser.add_option("","--ignoreCorrelation",default=False,action='store_true',help="Ignore the off-diagonal covariance terms")
@@ -48,6 +49,8 @@ ROOT.outname=options.outname
 
 # HERE we build up the elements for the SL from a python file
 model = __import__(options.model)
+print("signal: " , options.signal)
+model.LoadSignal(options.signal)
 
 # CHECK we don't go over the max 
 if model.nbins > ROOT.MAXBINS: sys.exit("Too many bins (nbins > %d), you should modify MAXBINS in .C code"%ROOT.MAXBINS)

@@ -22,7 +22,7 @@ int globalNpoints=30;
 std::string outname = "SL.root";
 
 // ********************* Touch nothing below here ! ************ /
-const int MAXBINS=100;
+const int MAXBINS=200;
 // USER INPUTS 	(inputs from Note below, you should use python to configure this) 
 double globalData[MAXBINS] ; // = {1964,877,354,182,82,36,15,11};
 double globalBackground[MAXBINS]; // = {2006.4,836.4,350.,147.1,62.0,26.2,11.1,4.7};
