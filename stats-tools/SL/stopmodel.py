@@ -43,22 +43,28 @@ name = "CMS-NOTE-2017-001 dummy model"
 nbins = len(datalist)
 data = array.array('d',datalist)
 background = array.array('d',bglist)
-
-## Cov Matrix
-import ROOT
-ROOT.gROOT.SetBatch(True)
-# f = ROOT.TFile("./Matrix/Minos.root", "r")
-f = ROOT.TFile("./Hesse.root", "r")
-th2 = f.Get("test")
-readout = []
-for i in range(1, th2.GetNbinsX()+1):
-    for j in range(1, th2.GetNbinsY()+1):
-        readout.append(th2.GetBinContent(i, j))
-        if th2.GetBinContent(i, j) == 0.0:
-            print(i, j, th2.GetBinContent(i, j))
-covariance= array.array('d',readout)
-
 signal = None
+covariance = None
+
+def LoadMatrix(useMinos=False):
+    global covariance
+    ## Cov Matrix
+    import ROOT
+    ROOT.gROOT.SetBatch(True)
+    # f = ROOT.TFile("./Matrix/Minos.root", "r")
+    f = ROOT.TFile("./Hesse.root", "r")
+    if useMinos:
+        print("Use Minos Matrix")
+        f = ROOT.TFile("./Minos.root", "r")
+    th2 = f.Get("test")
+    readout = []
+    for i in range(1, th2.GetNbinsX()+1):
+        for j in range(1, th2.GetNbinsY()+1):
+            readout.append(th2.GetBinContent(i, j))
+            if th2.GetBinContent(i, j) == 0.0:
+                print(i, j, th2.GetBinContent(i, j))
+    covariance= array.array('d',readout)
+
 
 ### signal
 def LoadSignal(signame):
@@ -73,7 +79,6 @@ def LoadSignal(signame):
     tgzfile = "%s/CombineDataCard_%s_081820_UnblindRun2/%s.tgz" % (dtfolder, susy, signame)
     p = subprocess.Popen("xrdcp root://cmseos.fnal.gov/%s tmp/" % tgzfile, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err= p.communicate()
-    print(out, err)
     tar = tarfile.open("tmp/%s.tgz" %signame,  "r:gz")
     signalmap = {}
     for r in tar.getmembers():

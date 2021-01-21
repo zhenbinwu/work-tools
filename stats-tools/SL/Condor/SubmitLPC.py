@@ -15,8 +15,10 @@ from collections import defaultdict
 DelExe    = '../runSL.py'
 OutDir = '/store/user/%s/Stop19/SimpleLH' %  getpass.getuser()
 tempdir = '/uscmst1b_scratch/lpc1/3DayLifetime/benwu/TestCondor/'
-ProjectName = 'test_v3'
-argument = " --model stopmodel --signal %s -o %s.root"
+ProjectName = 'Limit_MT_v3'
+argument = " --model stopmodel --signal {T2tt} -o {T2tt}_Hesse_MLimit --limit --doMultiplicative ; \
+        --model stopmodel --signal {T2tt} -o {T2tt}_Minos_MLimit --limit --doMultiplicative --useMinos"
+
 
 def tar_cmssw():
     print("Tarring up CMSSW, ignoring file larger than 100MB")
@@ -65,15 +67,18 @@ def my_process(args):
     except OSError:
         pass
 
+    ### Update condor files
+    configname = args.config.split("/")[-1].split(".")[0].replace("_signals", "")
+
     ## Create the output directory
-    outdir = OutDir +  "/" + ProjectName + "/"
+    outdir = OutDir +  "/" + ProjectName + "/" + configname
     try:
         os.makedirs("/eos/uscms/%s" % outdir)
     except OSError:
         pass
 
     ## Update RunHT.csh with DelDir and pileups
-    RunHTFile = tempdir + "/" + "RunExe.csh"
+    RunHTFile = tempdir + "/" + "RunExe_%s.csh" % configname
     with open(RunHTFile, "wt") as outfile:
         for line in open("RunExe.csh", "r"):
             #line = line.replace("DELDIR", os.environ['PWD'])
@@ -94,8 +99,6 @@ def my_process(args):
     tarballnames.append(tar_cmssw())
     tarballnames.append("/uscms/home/benwu/python-packages.tgz")
 
-    ### Update condor files
-    configname = args.config.split("/")[-1].split(".")[0].replace("_signals", "")
 
     ## Prepare the condor file
     condorfile = tempdir + "/" + "condor_" + ProjectName  + "_"+configname
@@ -110,10 +113,8 @@ def my_process(args):
             
         for i, l_ in enumerate(open(args.config, 'r').readlines()):
             signal = l_.strip()
-            line = "\nArguments = " + argument % (signal, signal)+ "\nQueue 1\n"
+            line = "\nArguments = " + argument.format(T2tt = signal) + "\nQueue 1\n"
             outfile.write(line)
-            if i == 1:
-                break
 
     Condor_Sub(condorfile)
 

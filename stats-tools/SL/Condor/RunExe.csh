@@ -15,7 +15,6 @@ setenv SCRAM_ARCH ${SCRAM}
 eval `scramv1 project CMSSW ${CMSSW}`
 tar -xzf ${_CONDOR_SCRATCH_DIR}/CMSSW.tgz
 cd ${CMSSW}
-ls
 eval `scramv1 runtime -csh` # cmsenv is an alias not on the workers
 echo "CMSSW: "$CMSSW_BASE
 
@@ -31,17 +30,12 @@ else
     setenv LD_LIBRARY_PATH ./:${LD_LIBRARY_PATH}
 endif
 
-echo "------------"
-
-ls
 cd src/work-tools/stats-tools/SL
-echo "------------"
-ls
 #============================================================================#
 #--------------------------   To Run the Process   --------------------------#
 #============================================================================#
-echo $EXE $argv
-python $EXE $argv
+python $EXE `echo $argv | cut -d ";" -f 1`
+python $EXE `echo $argv | cut -d ";" -f 2`
 
 if ($? == 0) then
   foreach outfile (`ls *root`)
